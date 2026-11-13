@@ -59,6 +59,10 @@ public class QuestionBankVO implements Serializable {
     private UserVO user;
 
     /**
+     * 题目数
+     */
+    private Long questionCount;
+    /**
      * 题库里的题目列表（分页）
      */
     Page<QuestionVO> questionPage;

@@ -1,0 +1,57 @@
+### 1. 管理员登录
+POST http://localhost:8101/api/user/login
+Content-Type: application/json
+
+{
+  "userAccount": "admin",
+  "userPassword": "12345678"
+}
+
+### 2. 管理员建题库
+POST http://localhost:8101/api/questionBank/add
+Content-Type: application/json
+
+{
+  "title": "管理员的专属题库",
+  "description": "测试权限",
+  "picture": "https://www.mianshiya.com/logo.png"
+}
+
+### 1. 注册普通用户（如果已存在可直接跳过）
+POST http://localhost:8101/api/user/register
+Content-Type: application/json
+
+{
+  "userAccount": "normal_user",
+  "userPassword": "12345678",
+  "checkPassword": "12345678"
+}
+
+### 2. 普通用户登录
+POST http://localhost:8101/api/user/login
+Content-Type: application/json
+
+{
+  "userAccount": "normal_user",
+  "userPassword": "12345678"
+}
+
+### 3. 普通用户尝试建题库
+POST http://localhost:8101/api/questionBank/add
+Content-Type: application/json
+
+{
+  "title": "普通用户想造反",
+  "description": "测试权限",
+  "picture": "https://www.mianshiya.com/logo.png"
+}
+
+
+### 测试 tag 筛选
+POST http://localhost:8101/api/question/list/page/vo
+Content-Type: application/json
+
+{
+  "tag": "JVM",
+  "pageSize": 5
+}

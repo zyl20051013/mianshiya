@@ -261,5 +261,13 @@ public class QuestionBankController {
         return ResultUtils.success(true);
     }
 
+    @GetMapping("/count")
+    public BaseResponse<Long> countQuestion(){
+        return ResultUtils.success(questionBankService.countQuestionBank());
+    }
+    @GetMapping("/count/title")
+    public BaseResponse<Long> countQuestionByTitle(String title){
+        return ResultUtils.success(questionBankService.countQuestionBankByTitle(title));
+    }
     // endregion
 }

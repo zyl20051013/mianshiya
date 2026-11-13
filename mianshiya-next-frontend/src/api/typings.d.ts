@@ -136,6 +136,11 @@ declare namespace API {
     timestamp?: string;
   };
 
+  type countQuestionByTitleUsingGETParams = {
+    /** title */
+    title?: string;
+  };
+
   type DeleteRequest = {
     id?: number;
   };
@@ -173,6 +178,11 @@ declare namespace API {
   type getUserByIdUsingGETParams = {
     /** id */
     id?: number;
+  };
+
+  type getUserSimpleUsingGETParams = {
+    /** id */
+    id: number;
   };
 
   type getUserVOByIdUsingGETParams = {
@@ -552,6 +562,7 @@ declare namespace API {
     searchText?: string;
     sortField?: string;
     sortOrder?: string;
+    tag?: string;
     tags?: string[];
     title?: string;
     userId?: number;

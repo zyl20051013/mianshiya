@@ -317,4 +317,13 @@ public class UserController {
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
     }
+
+    @GetMapping("/get/simple")
+    public BaseResponse<UserVO> getUserSimple(@RequestParam Long id){
+        ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
+        User user = userService.getById(id);
+        ThrowUtils.throwIf(user==null,ErrorCode.NOT_FOUND_ERROR);
+        UserVO uv = userService.getUserVO(user);
+        return ResultUtils.success(uv);
+    }
 }

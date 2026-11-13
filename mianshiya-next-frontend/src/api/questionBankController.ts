@@ -17,6 +17,29 @@ export async function addQuestionBankUsingPost(
   });
 }
 
+/** countQuestion GET /api/questionBank/count */
+export async function countQuestionUsingGet(options?: { [key: string]: any }) {
+  return request<API.BaseResponseLong_>('/api/questionBank/count', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
+/** countQuestionByTitle GET /api/questionBank/count/title */
+export async function countQuestionByTitleUsingGet(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.countQuestionByTitleUsingGETParams,
+  options?: { [key: string]: any },
+) {
+  return request<API.BaseResponseLong_>('/api/questionBank/count/title', {
+    method: 'GET',
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
 /** deleteQuestionBank POST /api/questionBank/delete */
 export async function deleteQuestionBankUsingPost(
   body: API.DeleteRequest,

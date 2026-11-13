@@ -11,6 +11,7 @@ import { PageContainer, ProTable } from "@ant-design/pro-components";
 import { Button, message, Space, Typography } from "antd";
 import React, { useRef, useState } from "react";
 import './index.css';
+import Link from "next/link";
 
 /**
  * 题库管理页面
@@ -103,11 +104,22 @@ const QuestionBankAdminPage: React.FC = () => {
       hideInForm: true,
     },
     {
+      title: "题目数",
+      dataIndex: "questionCount",
+      valueType: "text",
+      hideInSearch: true, // 统计出来的字段，不需要搜索
+      hideInForm: true,   // 后端算出来的，前端填不了
+    },
+    {
       title: "操作",
       dataIndex: "option",
       valueType: "option",
       render: (_, record) => (
+
         <Space size="middle">
+          <Link href={`/bank/${record.id}`} target="_blank">
+            查看
+          </Link>
           <Typography.Link
             onClick={() => {
               setCurrentRow(record);
@@ -129,7 +141,7 @@ const QuestionBankAdminPage: React.FC = () => {
       <ProTable<API.QuestionBank>
         headerTitle={"查询表格"}
         actionRef={actionRef}
-        rowKey="key"
+        rowKey="id"
         search={{
           labelWidth: 120,
         }}

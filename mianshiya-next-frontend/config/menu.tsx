@@ -5,6 +5,11 @@ import ACCESS_ENUM from "@/access/accessEnum";
 // 菜单列表
 export const menus = [
   {
+    path: "/about",
+    name: "关于",
+    access: ACCESS_ENUM.ADMIN, // 加上这行，只有管理员能看到
+  },
+  {
     path: "/",
     name: "主页",
   },

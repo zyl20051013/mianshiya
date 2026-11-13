@@ -175,4 +175,13 @@ public class QuestionBankServiceImpl extends ServiceImpl<QuestionBankMapper, Que
         return questionBankVOPage;
     }
 
+    @Override
+    public long countQuestionBank(){
+        return this.count();
+    }
+
+    @Override
+    public long countQuestionBankByTitle(String title){
+        return this.count(new QueryWrapper<QuestionBank>().like("title",title));
+    }
 }

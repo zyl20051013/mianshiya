@@ -98,6 +98,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         List<String> tagList = questionQueryRequest.getTags();
         Long userId = questionQueryRequest.getUserId();
         String answer = questionQueryRequest.getAnswer();
+        String tags = questionQueryRequest.getTag();
         // todo 补充需要的查询条件
         // 从多字段中搜索
         if (StringUtils.isNotBlank(searchText)) {
@@ -108,6 +109,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         queryWrapper.like(StringUtils.isNotBlank(title), "title", title);
         queryWrapper.like(StringUtils.isNotBlank(content), "content", content);
         queryWrapper.like(StringUtils.isNotBlank(answer), "answer", answer);
+        queryWrapper.like(StringUtils.isNotBlank(tags),"tags","\""+tags+"\"");
         // JSON 数组查询
         if (CollUtil.isNotEmpty(tagList)) {
             for (String tag : tagList) {
