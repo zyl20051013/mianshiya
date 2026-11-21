@@ -26,6 +26,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yupi.mianshiya.service.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
@@ -318,6 +319,11 @@ public class UserController {
         return ResultUtils.success(true);
     }
 
+    /**
+     * 获得脱敏数据
+     * @param id
+     * @return
+     */
     @GetMapping("/get/simple")
     public BaseResponse<UserVO> getUserSimple(@RequestParam Long id){
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
@@ -326,4 +332,33 @@ public class UserController {
         UserVO uv = userService.getUserVO(user);
         return ResultUtils.success(uv);
     }
+
+    /**
+     *用户签到
+     * @param request
+     * @return
+     */
+    @PostMapping("/add/sign_in")
+    public BaseResponse<Boolean> addUserSignIn(HttpServletRequest request){
+        User loginuser = userService.getLoginUser(request);
+        boolean result = userService.addUserSignIn(loginuser.getId());
+        return ResultUtils.success(result);
+    }
+
+
+    /**
+     *获取签到记录
+     * @param year
+     * @param request
+     * @return
+     */
+    @GetMapping("/get/sign_in")
+    public BaseResponse<List<Integer>> getUserSignInRecord(Integer year,HttpServletRequest request){
+        ThrowUtils.throwIf(year != null && year < 1000, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        List<Integer> daylist = userService.getUserSignInRecord(year,loginUser.getId());
+        return ResultUtils.success(daylist);
+
+    }
+
 }

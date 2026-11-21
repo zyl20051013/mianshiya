@@ -55,3 +55,119 @@ Content-Type: application/json
   "tag": "JVM",
   "pageSize": 5
 }
+
+
+###
+POST http://localhost:8101/api/user/add/sign_in
+Content-Type: application/json
+
+{
+  "userAccount": "admin",
+  "userPassword": "12345678"
+}
+
+### get
+GET http://localhost:8101/api/user/get/sign_in
+Content-Type: application/json
+
+{
+  "userAccount": "admin",
+  "userPassword": "12345678"
+
+}
+
+###
+POST http://localhost:9200/_analyze
+Content-Type: application/json
+
+{
+  "analyzer": "ik_max_word",
+  "text": "什么是JVM"
+}
+
+### 2. 测试 ik_max_word（最细粒度，存索引用）
+POST http://localhost:9200/_analyze
+Content-Type: application/json
+
+{
+  "analyzer": "ik_max_word",
+  "text": "JVM的数据库"
+}
+
+### 3. 测试 ik_smart（智能粒度，搜索用）
+POST http://localhost:9200/_analyze
+Content-Type: application/json
+
+{
+  "analyzer": "ik_smart",
+  "text": "JVM的内存结构"
+}
+
+### 1. 查询所有数据（验证是不是有 2 条）
+GET http://localhost:9200/question/_search?pretty
+Content-Type: application/json
+
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+### 2. 用 match 查标题含“虚拟机”
+GET http://localhost:9200/question/_search?pretty
+Content-Type: application/json
+
+{
+  "query": {
+    "match": {
+      "content": "虚拟机"
+    }
+  }
+}
+
+### 3. 用 term 查标签包含 "Java"
+GET http://localhost:9200/question/_search?pretty
+Content-Type: application/json
+
+{
+  "query": {
+    "term": {
+      "tags": "Java"
+    }
+  }
+}
+
+### 测试 ES 搜索接口
+POST http://localhost:8101/api/question/search/page/vo
+Content-Type: application/json
+
+{
+  "searchText": "栈",
+  "pageSize": 5
+}
+
+###
+GET http://localhost:9200/question/_count?pretty
+
+
+###
+POST http://localhost:9200/question/_delete_by_query
+Content-Type: application/json
+
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+### 验证被删除的题目在 ES 中的状态
+GET http://localhost:9200/question/_search?pretty
+Content-Type: application/json
+
+{
+  "query": {
+    "match": {
+      "title": "测试增量同步"
+    }
+  }
+}

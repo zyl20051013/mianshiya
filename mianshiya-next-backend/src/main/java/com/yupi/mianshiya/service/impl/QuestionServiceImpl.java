@@ -10,6 +10,7 @@ import com.yupi.mianshiya.common.ErrorCode;
 import com.yupi.mianshiya.constant.CommonConstant;
 import com.yupi.mianshiya.exception.ThrowUtils;
 import com.yupi.mianshiya.mapper.QuestionMapper;
+import com.yupi.mianshiya.model.dto.question.QuestionEsDTO;
 import com.yupi.mianshiya.model.dto.question.QuestionQueryRequest;
 import com.yupi.mianshiya.model.entity.Question;
 import com.yupi.mianshiya.model.entity.QuestionBankQuestion;
@@ -23,6 +24,16 @@ import com.yupi.mianshiya.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -229,4 +240,79 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         return questionPage;
     }
 
+
+
+    @Resource
+    private ElasticsearchRestTemplate elasticsearchRestTemplate; // 注意：如果是低版本可能叫 RestHighLevelClient 注入，但项目通常用 Template
+
+    @Override
+    public Page<Question> searchFromEs(QuestionQueryRequest request) {
+        // 1. 获取参数
+        String searchText = request.getSearchText();
+        List<String> tags = request.getTags();
+        Long userId = request.getUserId();
+        Long id = request.getId();
+        Long notId = request.getNotId();
+
+        // 2. 分页处理：ES 分页从 0 开始，前端从 1 开始
+        int current = request.getCurrent() - 1;
+        int pageSize = request.getPageSize();
+
+        // 3. 构建查询条件
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+
+        // 👇 过滤条件（不需要打分，用 filter 性能更好）
+        boolQuery.filter(QueryBuilders.termQuery("isDelete", 0));
+        if (id != null) {
+            boolQuery.filter(QueryBuilders.termQuery("id", id));
+        }
+        if (notId != null) {
+            boolQuery.mustNot(QueryBuilders.termQuery("id", notId));
+        }
+        if (userId != null) {
+            boolQuery.filter(QueryBuilders.termQuery("userId", userId));
+        }
+        if (CollUtil.isNotEmpty(tags)) {
+            for (String tag : tags) {
+                boolQuery.filter(QueryBuilders.termQuery("tags", tag));
+            }
+        }
+
+        // 👇 全文检索条件（需要打分，用 should）
+        if (StringUtils.isNotBlank(searchText)) {
+            boolQuery.should(QueryBuilders.matchQuery("title", searchText));
+            boolQuery.should(QueryBuilders.matchQuery("content", searchText));
+            boolQuery.should(QueryBuilders.matchQuery("answer", searchText));
+            boolQuery.minimumShouldMatch(1); // 至少匹配一个字段
+        }
+
+        // 4. 处理排序
+        SortBuilder<?> sortBuilder = SortBuilders.scoreSort(); // 默认按匹配度降序
+        if (StringUtils.isNotBlank(request.getSortField())) {
+            sortBuilder = SortBuilders.fieldSort(request.getSortField())
+                    .order(CommonConstant.SORT_ORDER_ASC.equals(request.getSortOrder())
+                            ? SortOrder.ASC : SortOrder.DESC);
+        }
+
+        // 5. 构建 NativeSearchQuery 执行查询
+        NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withQuery(boolQuery)
+                .withPageable(PageRequest.of(current, pageSize)) // 注意这里用的是 spring 的 PageRequest
+                .withSorts(sortBuilder)
+                .build();
+
+        // 执行查询，拿到结果
+        SearchHits<QuestionEsDTO> hits = elasticsearchRestTemplate.search(searchQuery, QuestionEsDTO.class);
+
+        // 6. 将结果转换为 Page<Question>
+        Page<Question> page = new Page<>();
+        page.setTotal(hits.getTotalHits());
+
+        List<Question> records = hits.getSearchHits().stream()
+                .map(hit -> QuestionEsDTO.dtoToObj(hit.getContent()))
+                .collect(Collectors.toList());
+        page.setRecords(records);
+
+        return page;
+    }
 }

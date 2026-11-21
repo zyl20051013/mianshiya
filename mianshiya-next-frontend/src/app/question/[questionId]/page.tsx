@@ -18,8 +18,9 @@ export default async function QuestionPage({ params }) {
       id: questionId,
     });
     question = res.data;
-  } catch (e) {
-    message.error("获取题目详情失败，" + e.message);
+  } catch (e: any) {
+    // 把原来的 message.error("xxx") 改成下面这句
+    console.error("获取题目详情失败：" + e.message);
   }
   // 错误处理
   if (!question) {

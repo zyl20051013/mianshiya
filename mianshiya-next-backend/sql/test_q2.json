@@ -1,0 +1,9 @@
+{
+  "title": "JVM 的内存结构",
+  "content": "栈、堆、方法区怎么划分",
+  "answer": "包含堆、栈、方法区等",
+  "tags": ["Java"],
+  "userId": 1,
+  "isDelete": 0,
+  "createTime": "2026-11-02 10:00:00"
+}

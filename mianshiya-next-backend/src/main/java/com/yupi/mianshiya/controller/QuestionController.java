@@ -249,5 +249,27 @@ public class QuestionController {
         return ResultUtils.success(true);
     }
 
+
+    /**
+     * 搜索题目（从 ES 查询）
+     */
+    @PostMapping("/search/page/vo")
+    public BaseResponse<Page<QuestionVO>> searchQuestionVOByPage(
+            @RequestBody QuestionQueryRequest questionQueryRequest,
+            HttpServletRequest request) {
+
+        // 1. 获取分页大小
+        long size = questionQueryRequest.getPageSize();
+
+        // 2. 安全校验：防止恶意请求拉取过多数据导致 ES 崩溃
+        ThrowUtils.throwIf(size > 200, ErrorCode.PARAMS_ERROR, "单页数据过大");
+
+        // 3. 调用 Service 层的 ES 搜索方法
+        Page<Question> questionPage = questionService.searchFromEs(questionQueryRequest);
+
+        // 4. 复用之前的 VO 封装逻辑，将结果返回给前端
+        return ResultUtils.success(questionService.getQuestionVOPage(questionPage, request));
+    }
+
     // endregion
 }

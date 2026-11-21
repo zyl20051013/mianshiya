@@ -104,13 +104,6 @@ const QuestionBankAdminPage: React.FC = () => {
       hideInForm: true,
     },
     {
-      title: "题目数",
-      dataIndex: "questionCount",
-      valueType: "text",
-      hideInSearch: true, // 统计出来的字段，不需要搜索
-      hideInForm: true,   // 后端算出来的，前端填不了
-    },
-    {
       title: "操作",
       dataIndex: "option",
       valueType: "option",

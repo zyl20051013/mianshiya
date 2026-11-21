@@ -1,0 +1,9 @@
+{
+  "title": "什么是 JVM？",
+  "content": "请简述 Java 虚拟机的作用",
+  "answer": "JVM 是 Java 程序的运行环境",
+  "tags": ["Java", "JVM"],
+  "userId": 1,
+  "isDelete": 0,
+  "createTime": "2026-11-01 10:00:00"
+}

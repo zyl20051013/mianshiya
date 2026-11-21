@@ -118,4 +118,18 @@ public interface UserService extends IService<User> {
      */
     QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest);
 
+    /**
+     * 添加用户签到信息
+     * @param userId
+     * @return
+     */
+    boolean addUserSignIn(long userId);
+
+    /**
+     * 获取用户某年的签到信息
+     * @param year
+     * @param userId
+     * @return
+     */
+    List<Integer> getUserSignInRecord(Integer year,long userId);
 }

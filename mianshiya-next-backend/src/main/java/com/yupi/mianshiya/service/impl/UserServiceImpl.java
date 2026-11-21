@@ -15,15 +15,24 @@ import com.yupi.mianshiya.model.enums.UserRoleEnum;
 import com.yupi.mianshiya.model.vo.LoginUserVO;
 import com.yupi.mianshiya.model.vo.UserVO;
 import com.yupi.mianshiya.service.UserService;
+import com.yupi.mianshiya.utils.RedisUtils;
 import com.yupi.mianshiya.utils.SqlUtils;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.Redisson;
+import org.redisson.api.RBitSet;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -41,6 +50,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * 盐值，混淆密码
      */
     public static final String SALT = "yupi";
+    private final RedissonClient redissonClient;
+
+    public UserServiceImpl(@Qualifier("redissonClient") RedissonClient redissonClient) {
+        this.redissonClient = redissonClient;
+    }
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
@@ -268,5 +282,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
                 sortField);
         return queryWrapper;
+    }
+
+    @Override
+    public boolean addUserSignIn(long userId) {
+        LocalDate date = LocalDate.now();
+        String key = RedisUtils.getUserSignInRedisKey(date.getYear(),userId);
+        RBitSet bitSet = redissonClient.getBitSet(key);
+        int offset = date.getDayOfYear();
+        if(!bitSet.get(offset)){
+            bitSet.set(offset,true);
+        }
+        //todo 这里返回值可以按需求改
+        return true;
+    }
+
+    @Override
+    public List<Integer> getUserSignInRecord(Integer year, long userId) {
+        if(year == null){
+            year = LocalDate.now().getYear();
+        }
+        String key = RedisUtils.getUserSignInRedisKey(year,userId);
+        RBitSet bitSet = redissonClient.getBitSet(key);
+        BitSet localBits = bitSet.asBitSet();
+        List<Integer> dayList = new ArrayList<>();
+        int index = localBits.nextSetBit(0);
+        while (index >= 0){
+            dayList.add(index);
+            index = localBits.nextSetBit(index + 1);
+        }
+        return dayList;
     }
 }
